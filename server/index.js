@@ -10,7 +10,7 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://your-app-name.vercel.app'],
+  origin: ['http://localhost:5173', 'https://the-factory-project-2-0.vercel.app'],
   credentials: true
 }));
 app.use(express.json());
