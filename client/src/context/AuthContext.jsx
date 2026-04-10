@@ -17,18 +17,26 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is already logged in on mount
   useEffect(() => {
+    const abortController = new AbortController();
+
     const checkAuth = async () => {
       try {
-        const response = await api.get('/api/auth/me');
+        const response = await api.get('/api/auth/me', {
+          signal: abortController.signal
+        });
         setUser(response.data);
       } catch (err) {
-        setUser(null);
+        if (err.name !== 'AbortError') {
+          setUser(null);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
+
+    return () => abortController.abort();
   }, []);
 
   const login = useCallback(async (email, password) => {

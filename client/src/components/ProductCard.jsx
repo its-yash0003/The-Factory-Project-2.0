@@ -13,17 +13,20 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-card overflow-hidden hover:shadow-lg transition-shadow duration-200">
+    <div className="bg-surface rounded-lg shadow-card overflow-hidden hover:shadow-xl transition-all duration-300 group">
       {/* Product Image */}
       <Link to={`/products/${product._id}`}>
-        <div className="aspect-[4/3] bg-gray-100 overflow-hidden">
+        <div className="aspect-[4/3] bg-gray-100 overflow-hidden relative">
           {product.images?.[0] ? (
-            <img
-              src={`http://localhost:5000${product.images[0]}`}
-              alt={product.name}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-              loading="lazy"
-            />
+            <>
+              <img
+                src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${product.images[0]}`}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
               <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">

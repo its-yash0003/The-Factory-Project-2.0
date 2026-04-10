@@ -58,7 +58,7 @@ const CartPage = () => {
                 <div className="w-24 h-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
                   {item.image ? (
                     <img
-                      src={`http://localhost:5000${item.image}`}
+                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${item.image}`}
                       alt={item.productName}
                       className="w-full h-full object-cover"
                     />

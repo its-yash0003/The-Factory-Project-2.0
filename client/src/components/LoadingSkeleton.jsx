@@ -25,4 +25,14 @@ const LoadingSkeleton = ({ count = 6 }) => {
   );
 };
 
+// Full page loading spinner
+export const LoadingSpinner = ({ message = 'Loading...' }) => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="text-center">
+      <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary/20 border-t-accent mb-4" />
+      <p className="text-secondary">{message}</p>
+    </div>
+  </div>
+);
+
 export default LoadingSkeleton;

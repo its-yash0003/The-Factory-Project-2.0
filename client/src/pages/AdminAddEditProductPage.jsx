@@ -24,13 +24,18 @@ const AdminAddEditProductPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const allSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+  const allSizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
-  const loadProduct = useCallback(async () => {
-    if (!isEditMode) return;
+  const loadProduct = useCallback(async (abortController) => {
+    if (!isEditMode) {
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const response = await api.get(`/api/products/${id}`);
+      const response = await api.get(`/api/products/${id}`, {
+        signal: abortController?.signal
+      });
       const product = response.data;
       setFormData({
         name: product.name || '',
@@ -43,16 +48,20 @@ const AdminAddEditProductPage = () => {
       });
       setExistingImages(product.images || []);
     } catch (err) {
-      console.error('Error loading product:', err);
-      toast.error('Failed to load product');
-      navigate('/admin');
+      if (err.name !== 'AbortError') {
+        console.error('Error loading product:', err);
+        toast.error('Failed to load product');
+        navigate('/admin');
+      }
     } finally {
       setIsLoading(false);
     }
   }, [id, isEditMode, navigate]);
 
   useEffect(() => {
-    loadProduct();
+    const abortController = new AbortController();
+    loadProduct(abortController);
+    return () => abortController.abort();
   }, [loadProduct]);
 
   const handleChange = (e) => {
@@ -295,7 +304,7 @@ const AdminAddEditProductPage = () => {
                 {existingImages.map((img, index) => (
                   <div key={index} className="relative w-24 h-24">
                     <img
-                      src={`http://localhost:5000${img}`}
+                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${img}`}
                       alt={`Product ${index + 1}`}
                       className="w-full h-full object-cover rounded"
                     />

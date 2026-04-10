@@ -5,7 +5,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor for abort control
+// Request interceptor to add abort signal if not present
 api.interceptors.request.use(config => {
   return config;
 });
@@ -14,7 +14,13 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   response => response,
   error => {
-    console.error('API Error:', error.response?.data?.message || error.message);
+    // Don't log aborted requests
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
+    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+    console.error('API Error:', message);
     return Promise.reject(error);
   }
 );

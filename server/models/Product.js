@@ -17,7 +17,7 @@ const productSchema = new mongoose.Schema({
   },
   sizes: {
     type: [String],
-    default: ['S', 'M', 'L', 'XL', 'XXL']
+    default: ['S', 'M', 'L', 'XL', 'XXL', 'XXXL']
   },
   category: {
     type: String,

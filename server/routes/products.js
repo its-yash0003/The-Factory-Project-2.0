@@ -76,7 +76,7 @@ router.get('/:id', async (req, res) => {
 // POST /api/products - Create product (admin only, with image upload)
 router.post('/', auth, upload.array('images', 4), async (req, res) => {
   try {
-    const { name, description, price, sizes, category, stock } = req.body;
+    const { name, description, price, sizes, category, stock, isActive } = req.body;
 
     // Validate required fields
     if (!name || !price) {
@@ -87,12 +87,13 @@ router.post('/', auth, upload.array('images', 4), async (req, res) => {
 
     const product = new Product({
       name,
-      description,
+      description: description || '',
       price: parseFloat(price),
       sizes: sizes ? (Array.isArray(sizes) ? sizes : JSON.parse(sizes)) : [],
-      category,
+      category: category || '',
       images,
-      stock: parseInt(stock) || 100
+      stock: parseInt(stock) || 100,
+      isActive: isActive !== undefined ? isActive === 'true' || isActive === true : true
     });
 
     await product.save();

@@ -9,29 +9,35 @@ const ProductsPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [sizeFilter, setSizeFilter] = useState('');
   const [categories, setCategories] = useState([]);
-  const allSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+  const allSizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (abortController) => {
     try {
       const params = new URLSearchParams();
       if (categoryFilter) params.append('category', categoryFilter);
       if (sizeFilter) params.append('size', sizeFilter);
 
-      const response = await api.get(`/api/products?${params}`);
+      const response = await api.get(`/api/products?${params}`, {
+        signal: abortController?.signal
+      });
       setProducts(response.data);
 
       // Extract unique categories
       const uniqueCategories = [...new Set(response.data.map(p => p.category).filter(Boolean))];
       setCategories(uniqueCategories);
     } catch (err) {
-      console.error('Error loading products:', err);
+      if (err.name !== 'AbortError') {
+        console.error('Error loading products:', err);
+      }
     } finally {
       setIsLoading(false);
     }
   }, [categoryFilter, sizeFilter]);
 
   useEffect(() => {
-    loadProducts();
+    const abortController = new AbortController();
+    loadProducts(abortController);
+    return () => abortController.abort();
   }, [loadProducts]);
 
   const clearFilters = () => {

@@ -15,23 +15,29 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
 
-  const loadProduct = useCallback(async () => {
+  const loadProduct = useCallback(async (abortController) => {
     try {
-      const response = await api.get(`/api/products/${id}`);
+      const response = await api.get(`/api/products/${id}`, {
+        signal: abortController?.signal
+      });
       setProduct(response.data);
       if (response.data.sizes?.length > 0) {
         setSelectedSize(response.data.sizes[0]);
       }
     } catch (err) {
-      console.error('Error loading product:', err);
-      toast.error('Failed to load product details');
+      if (err.name !== 'AbortError') {
+        console.error('Error loading product:', err);
+        toast.error('Failed to load product details');
+      }
     } finally {
       setIsLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
-    loadProduct();
+    const abortController = new AbortController();
+    loadProduct(abortController);
+    return () => abortController.abort();
   }, [loadProduct]);
 
   const handleAddToCart = () => {
@@ -96,7 +102,7 @@ const ProductDetailPage = () => {
             <div className="aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden mb-4">
               {product.images?.[activeImage] ? (
                 <img
-                  src={`http://localhost:5000${product.images[activeImage]}`}
+                  src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${product.images[activeImage]}`}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
@@ -121,7 +127,7 @@ const ProductDetailPage = () => {
                     }`}
                   >
                     <img
-                      src={`http://localhost:5000${img}`}
+                      src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${img}`}
                       alt={`${product.name} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />

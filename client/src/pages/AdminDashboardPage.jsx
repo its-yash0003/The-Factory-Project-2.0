@@ -13,30 +13,47 @@ const AdminDashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (abortController) => {
     try {
-      const response = await api.get('/api/products');
+      const response = await api.get('/api/products', {
+        signal: abortController?.signal
+      });
       setProducts(response.data);
     } catch (err) {
-      console.error('Error loading products:', err);
-      toast.error('Failed to load products');
+      if (err.name !== 'AbortError') {
+        console.error('Error loading products:', err);
+        toast.error('Failed to load products');
+      }
     }
   }, []);
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (abortController) => {
     try {
-      const response = await api.get('/api/orders');
+      const response = await api.get('/api/orders', {
+        signal: abortController?.signal
+      });
       setOrders(response.data);
     } catch (err) {
-      console.error('Error loading orders:', err);
-      toast.error('Failed to load orders');
+      if (err.name !== 'AbortError') {
+        console.error('Error loading orders:', err);
+        toast.error('Failed to load orders');
+      }
     }
   }, []);
 
   useEffect(() => {
-    Promise.all([loadProducts(), loadOrders()]).then(() => {
+    const abortController = new AbortController();
+    Promise.all([
+      loadProducts(abortController),
+      loadOrders(abortController)
+    ]).then(() => {
       setIsLoading(false);
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        console.error('Error loading dashboard data:', err);
+      }
     });
+    return () => abortController.abort();
   }, [loadProducts, loadOrders]);
 
   const handleLogout = async () => {
@@ -160,7 +177,7 @@ const AdminDashboardPage = () => {
                           <div className="flex items-center gap-3">
                             {product.images?.[0] ? (
                               <img
-                                src={`http://localhost:5000${product.images[0]}`}
+                                src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${product.images[0]}`}
                                 alt={product.name}
                                 className="w-12 h-12 object-cover rounded"
                               />
